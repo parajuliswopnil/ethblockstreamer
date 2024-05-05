@@ -137,6 +137,61 @@ func BlockHash(client *ethclient.Client, blockNumber *big.Int) {
 	fmt.Println("hash", hash.Hash())
 }
 
+func GetBlock(client *ethclient.Client) {
+	block, err := client.BlockByNumber(context.Background(), big.NewInt(5827167))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(block.Time())
+}
+
+func GetBlockOfTimeStamp(client *ethclient.Client, ts uint64) {
+	currentBlock, err := client.BlockNumber(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	startBlock := currentBlock - 100
+
+	for {
+		midBlock := (startBlock + currentBlock) / 2
+		block, err := client.BlockByNumber(context.Background(), big.NewInt(int64(midBlock)))
+		if err != nil {
+			panic(err)
+		}
+		if block.Time() >= ts {
+			currentBlock = midBlock
+			fmt.Println(block.Time())
+			fmt.Println("continued")
+			continue
+		} else {
+			midBlockPlusOne, err := client.BlockByNumber(context.Background(), big.NewInt(int64(midBlock + 1)))
+			if err != nil {
+				panic(err)
+			}
+			if midBlockPlusOne.Time() >= ts {
+				fmt.Println(block.Time())
+				startBlock = midBlock
+				break
+			} else {
+				startBlock = midBlock
+				fmt.Println("continued from bottom")
+				continue
+			}
+		}
+
+		
+	}
+	fmt.Println(startBlock)
+}
+
+func BlockTime(client *ethclient.Client, bn uint64) {
+	block, err := client.BlockByNumber(context.Background(), big.NewInt(int64(bn)))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(block.Time())
+}
+
 func CheckCorrectness(blockNumber string) {
 	cmd := exec.CommandContext(context.Background(), "/Users/swopnilparajuli/workspace/cedro/MetalayerMaterials/zeth/target/release/zeth", "build", "--network", "ethereum",
 		"--eth-rpc-url", "https://eth.llamarpc.com", "--cache", "host/testdata", " --block-number", blockNumber)
